@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/document_api.dir/src/main.cpp.o -o document_api  -lpthread 

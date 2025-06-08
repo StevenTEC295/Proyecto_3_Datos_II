@@ -1,0 +1,3 @@
+/home/steven/Escritorio/Proyecto_3_Datos_II/build/CMakeFiles/document_api.dir
+/home/steven/Escritorio/Proyecto_3_Datos_II/build/CMakeFiles/edit_cache.dir
+/home/steven/Escritorio/Proyecto_3_Datos_II/build/CMakeFiles/rebuild_cache.dir
