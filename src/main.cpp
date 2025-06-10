@@ -133,9 +133,17 @@ int main() {
         
         return crow::response(response);
     });
-        CROW_ROUTE(app, "/get file").methods("GET"_method)
+        CROW_ROUTE(app, "/get_file").methods("GET"_method)
     ([](){
-        return "reornado el file";
+        return "retornando los files";
+    });
+    CROW_ROUTE(app, "/get_file/<string>").methods("GET"_method)
+    ([](std::string filename){
+        return "retornando el file "+ filename;
+    });
+    CROW_ROUTE(app, "/delete_file/<string>").methods("DELETE"_method)
+    ([](std::string filename){
+        return "eliminando el file "+ filename;
     });
 
     // Configurar y ejecutar el servidor
