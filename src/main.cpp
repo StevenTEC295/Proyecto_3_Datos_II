@@ -6,6 +6,10 @@
 #include <iomanip>
 #include <random>
 
+/// CHANGE THIS INCLUDE TO INCLUDE THE HEADER (.H) AND NOT THE .CPP ///
+#include "ControllerNode.cpp"
+/// CHANGE THIS INCLUDE TO INCLUDE THE HEADER (.H) AND NOT THE .CPP ///
+
 // Función para verificar si un directorio existe, si no, crearlo
 bool ensure_directory_exists(const std::string& path) {
     struct stat info;
@@ -60,6 +64,26 @@ std::string get_filename_from_headers(const crow::multipart::mph_map& headers) {
 }
 
 int main() {
+
+    ControllerNode controller_node;
+    controller_node.TestDisks();
+    
+    controller_node.DisplayDisks();
+
+
+
+
+
+
+
+
+
+
+
+
+    /// Server initialization ///
+
+
     // Configurar la aplicación Crow con CORS
     crow::App<crow::CORSHandler> app;
     
@@ -72,7 +96,7 @@ int main() {
     
     // Ruta para verificar que el servidor está funcionando
     CROW_ROUTE(app, "/")([](){
-        return "API de carga de archivos funcionando";
+        return "API de carga de archivos";
     });
     
     // Ruta para subir archivos
