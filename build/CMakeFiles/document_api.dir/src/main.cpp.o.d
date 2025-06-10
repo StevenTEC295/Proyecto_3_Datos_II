@@ -878,4 +878,5 @@ CMakeFiles/document_api.dir/src/main.cpp.o: \
  /usr/local/include/crow/http_connection.h \
  /usr/local/include/crow/http_server.h /usr/local/include/crow/version.h \
  /usr/local/include/crow/app.h /usr/include/c++/13/thread \
- /usr/include/c++/13/bits/this_thread_sleep.h
+ /usr/include/c++/13/bits/this_thread_sleep.h \
+ /usr/local/include/crow/middlewares/cors.h
