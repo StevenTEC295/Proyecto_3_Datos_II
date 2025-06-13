@@ -190,6 +190,8 @@ int main() {
             std::string unique_filename = generate_unique_filename(filename);
             std::string filepath = upload_dir + "/" + unique_filename;
             
+            /// Saving the file ///
+            // This old version saves a file equivalent to the original and with the same name.
             // Guardar el archivo en el sistema
             std::ofstream out_file(filepath, std::ios::binary);
             if (!out_file) {
@@ -200,6 +202,14 @@ int main() {
             out_file.close();
             
             saved_files.push_back(unique_filename);
+            
+            // New version saves the file into the disks of the raid and creates a matching file entry in the files vector of ControllerNode.
+            // Gets a suitable start position to save the file into.
+            int size = part.body.size();
+            // controller_node.FindStartPositionTest("Emmy" , 64)
+
+
+            /// Saving the file ///
         }
         
         // Construir respuesta JSON
