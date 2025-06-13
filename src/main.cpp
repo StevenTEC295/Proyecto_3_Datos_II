@@ -67,11 +67,67 @@ int main() {
 
     ControllerNode controller_node;
     controller_node.TestDisks();
+
+    std::cout << "DisplayDisks(0, 64)" << std::endl;
+    controller_node.DisplayDisks(0, 64);
     
-    controller_node.DisplayDisks();
+    // // Test CountCheckDisks(start, end):
+    // std::cout << "controller_node.CountCheckBytes(11, 15): " << controller_node.CountCheckBytes(11, 15) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 16): " << controller_node.CountCheckBytes(11, 16) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 17): " << controller_node.CountCheckBytes(11, 17) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 18): " << controller_node.CountCheckBytes(11, 18) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 20): " << controller_node.CountCheckBytes(11, 20) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 21): " << controller_node.CountCheckBytes(11, 21) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 22): " << controller_node.CountCheckBytes(11, 22) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 23): " << controller_node.CountCheckBytes(11, 23) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 24): " << controller_node.CountCheckBytes(11, 24) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 25): " << controller_node.CountCheckBytes(11, 25) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 26): " << controller_node.CountCheckBytes(11, 26) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 27): " << controller_node.CountCheckBytes(11, 27) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 28): " << controller_node.CountCheckBytes(11, 28) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 29): " << controller_node.CountCheckBytes(11, 29) << std::endl;
 
 
+    // // Test CountDataBytes(start, end):
+    // std::cout << "controller_node.CountDataBytes(11, 15): " << controller_node.CountDataBytes(11, 15) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 16): " << controller_node.CountDataBytes(11, 16) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 17): " << controller_node.CountDataBytes(11, 17) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 18): " << controller_node.CountDataBytes(11, 18) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 20): " << controller_node.CountDataBytes(11, 20) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 21): " << controller_node.CountDataBytes(11, 21) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 22): " << controller_node.CountDataBytes(11, 22) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 23): " << controller_node.CountDataBytes(11, 23) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 24): " << controller_node.CountDataBytes(11, 24) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 25): " << controller_node.CountDataBytes(11, 25) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 26): " << controller_node.CountDataBytes(11, 26) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 27): " << controller_node.CountDataBytes(11, 27) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 28): " << controller_node.CountDataBytes(11, 28) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 29): " << controller_node.CountDataBytes(11, 29) << std::endl;
 
+
+    // Test FindStartPosition(size, start):
+    // std::cout << "controller_node.FindStartPosition(\"Emmy\" , 64): " << controller_node.FindStartPosition("Emmy" , 64) << std::endl;
+
+
+    // // Test FindStartPositionTest(size, start):
+    // std::cout << "controller_node.FindStartPositionTest(\"Emmy\" , 64): " << controller_node.FindStartPositionTest("Emmy" , 64) << std::endl;
+    // std::cout << "controller_node.FindStartPositionTest(\"Franny\" , 128): " << controller_node.FindStartPositionTest("Franny" , 128) << std::endl;
+    // std::cout << "controller_node.FindStartPositionTest(\"Molly\" , 256): " << controller_node.FindStartPositionTest("Molly" , 256) << std::endl;
+    // std::cout << "controller_node.FindStartPositionTest(\"Molly\" , 256): " << controller_node.FindStartPositionTest("Amy" , 1024) << std::endl;
+
+    // //?
+    // // std::cout << "controller_node.CountDataBytes(0, controller_node.ShowFiles()): " << controller_node.CountDataBytes(0, controller_node.ShowFiles()) << std::endl;
+    // controller_node.ShowFiles();
+    // std::cout << "Total bytes to allocate: " << 64 + 128 + 256 + 1024 << std::endl;
+    // std::cout << "controller_node.CountDataBytes(0, 1962): " << controller_node.CountDataBytes(0, 1962) << std::endl;
+
+    // for (size_t i = 0; i < controller_node.files.size(); i++)
+    // {
+    //     std::cout << "controller_node.CountDataBytes(start_i, end_i): " << controller_node.CountDataBytes(controller_node.files[i].start_position, controller_node.files[i].end_position) << std::endl;
+    // }
+
+
+    // return 0;
 
 
 
