@@ -139,7 +139,25 @@ int main() {
     });
     CROW_ROUTE(app, "/get_file/<string>").methods("GET"_method)
     ([](std::string filename){
-        return "retornando el file "+ filename;
+
+        std::string filepath = "uploads/" + filename;
+        std::ifstream file(filepath, std::ios::binary);
+        
+            if (!file.is_open()) {
+            return crow::response(404, "Archivo no encontrado");
+        }
+
+        // Leer contenido
+        std::ostringstream buffer;
+        buffer << file.rdbuf();
+        std::string file_content = buffer.str();
+
+        crow::response res;
+        res.code = 200;
+        res.set_header("Content-Type", "application/octet-stream");
+        res.set_header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        res.body = file_content;
+        return res;
     });
     CROW_ROUTE(app, "/delete_file/<string>").methods("DELETE"_method)
     ([](std::string filename){
