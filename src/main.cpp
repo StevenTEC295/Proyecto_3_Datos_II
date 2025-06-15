@@ -77,6 +77,25 @@ std::string get_filename_from_headers(const crow::multipart::mph_map& headers) {
 
     return "unnamed_file";
 }
+// std::string get_filename_from_headers(const std::unordered_map<std::string, std::string>& headers) {
+//     auto it = headers.find("Content-Disposition");
+//     if (it != headers.end()) {
+//         std::string content_disposition = it->second;
+
+//         // Find 'filename="'
+//         std::string key = "filename=\"";
+//         size_t start = content_disposition.find(key);
+//         if (start != std::string::npos) {
+//             start += key.length();
+//             size_t end = content_disposition.find("\"", start);
+//             if (end != std::string::npos) {
+//                 return content_disposition.substr(start, end - start);
+//             }
+//         }
+//     }
+//     return "unknown";
+// }
+
 
 
 int main() {

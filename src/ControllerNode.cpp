@@ -742,7 +742,7 @@ public:
         for (size_t i = 0; i < disk_amount; i++)
         {
             // Uses emplace_back because std::fstream is non-copyable.
-            disks.emplace_back(disk_names[i], std::ios::in | std::ios::binary);
+            disks.emplace_back(disk_names[i], std::ios::in | std::ios::binary); // std::ios::in is for reading. believe it or not.
         }
         for (size_t i = start; i < end; i++)
         {
