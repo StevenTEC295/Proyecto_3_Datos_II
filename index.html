@@ -76,6 +76,29 @@
             
             <button type="submit">Enviar</button>
         </form>
+        <!-- Nuevo botón para enviar solo texto -->
+        <div style="margin-top: 20px; text-align: center;">
+            <button onclick="enviarSoloTexto()">Enviar Solo Texto</button>
+        </div>
+    </div>
+
+    <script>
+    function enviarSoloTexto() {
+        const texto = document.getElementById("texto").value.trim();
+
+        if (!texto) {
+            alert("Por favor ingresa un texto antes de enviar.");
+            return;
+        }
+
+        // Codificamos el texto para que sea seguro en la URL
+        const textoCodificado = encodeURIComponent(texto);
+        const url = `http://0.0.0.0:18080/get_file/${textoCodificado}`;
+
+        // Redirigir al usuario (si quieres abrirlo en el navegador):
+        window.location.href = url;
+    }
+    </script>
     </div>
 </body>
 </html>
