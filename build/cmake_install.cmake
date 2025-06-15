@@ -1,4 +1,4 @@
-# Install script for directory: /home/steven/Escritorio/Proyecto_3_Datos_II
+# Install script for directory: /home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/steven/Escritorio/Proyecto_3_Datos_II/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

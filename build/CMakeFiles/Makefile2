@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/steven/Escritorio/Proyecto_3_Datos_II
+CMAKE_SOURCE_DIR = /home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/steven/Escritorio/Proyecto_3_Datos_II/build
+CMAKE_BINARY_DIR = /home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/document_api.dir/clean
 CMakeFiles/document_api.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/document_api.dir/build.make CMakeFiles/document_api.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/document_api.dir/build.make CMakeFiles/document_api.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/steven/Escritorio/Proyecto_3_Datos_II/build/CMakeFiles --progress-num=1,2 "Built target document_api"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II/build/CMakeFiles --progress-num=1,2 "Built target document_api"
 .PHONY : CMakeFiles/document_api.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/document_api.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/steven/Escritorio/Proyecto_3_Datos_II/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II/build/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/document_api.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/steven/Escritorio/Proyecto_3_Datos_II/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/esteban/Documents/d/tec/semestre-i-2025/proyecto-3-datos-II/TEC_MFS_project/Proyecto_3_Datos_II/build/CMakeFiles 0
 .PHONY : CMakeFiles/document_api.dir/rule
 
 # Convenience name for target.
