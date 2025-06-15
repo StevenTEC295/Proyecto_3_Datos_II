@@ -726,7 +726,7 @@ public:
         if (file_index == -1)
         {
             std::cout << "GetFile: File not found." << std::endl;
-            std::string no_result;
+            std::string no_result = "File not found.";
             return no_result;
         }
         

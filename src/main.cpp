@@ -47,34 +47,19 @@ std::string generate_unique_filename(const std::string& original_name) {
 }
 
 std::string get_filename_from_headers(const crow::multipart::mph_map& headers) {
-    for (const auto& header : headers) {
-        std::cout << "Header: " << header.first << " = " << header.second.value << std::endl;
-        if (header.first == "Content-Disposition") {
-            const std::string& value = header.second.value;
+    auto it = headers.find("Content-Disposition");
+    if (it != headers.end()) {
+        const auto& header_value = it->second.value;
+        const auto& params = it->second.params;
 
-            // Buscar filename="..."
-            auto pos = value.find("filename=\"");
-            if (pos != std::string::npos) {
-                pos += 10;
-                auto end = value.find("\"", pos);
-                if (end != std::string::npos)
-                    return value.substr(pos, end - pos);
-            }
+        std::cout << "[DEBUG] Content-Disposition: " << header_value << std::endl;
 
-            // Buscar filename*=UTF-8''nombre.ext (RFC 5987)
-            pos = value.find("filename*=");
-            if (pos != std::string::npos) {
-                pos += 9;
-                std::string remaining = value.substr(pos);
-                auto charset_pos = remaining.find("''");
-                if (charset_pos != std::string::npos) {
-                    return remaining.substr(charset_pos + 2);  // omitimos el charset
-                }
-                return remaining; // fallback
-            }
+        auto filename_it = params.find("filename");
+        if (filename_it != params.end()) {
+            std::cout << "[DEBUG] Filename param found: " << filename_it->second << std::endl;
+            return filename_it->second;
         }
     }
-
     return "unnamed_file";
 }
 // std::string get_filename_from_headers(const std::unordered_map<std::string, std::string>& headers) {
@@ -95,6 +80,7 @@ std::string get_filename_from_headers(const crow::multipart::mph_map& headers) {
 //     }
 //     return "unknown";
 // }
+
 
 
 
@@ -226,7 +212,7 @@ int main() {
     cors
       .global()
         .headers("X-Custom-Header", "Content-Type")
-        .methods("POST"_method);
+        .methods("POST"_method, "GET"_method, "DELETE"_method);
     
     // Ruta para verificar que el servidor está funcionando
     CROW_ROUTE(app, "/")([](){
@@ -243,7 +229,7 @@ int main() {
             return crow::response(500, "No se pudo crear el directorio de subidas");
         }
 
-        //std::cout << req.body << std::endl;
+        std::cout << req.body << std::endl;
         
         // Parsear el cuerpo de la petición multipart
         crow::multipart::message file_message(req);
@@ -260,7 +246,7 @@ int main() {
         
         for (const auto& part : file_message.parts) {
             // Obtener el nombre original del archivo
-
+            
             //std::cout << "Part name: " << part.headers << std::endl;
             std::string filename = get_filename_from_headers(part.headers);
             
@@ -309,9 +295,12 @@ int main() {
         // Leer contenido
         std::string file_content = controller_node.GetFile(filename);
 
+        if (file_content == "File not found.") {
+            return crow::response(404, "Archivo no encontrado");
+        }
         crow::response res;
         res.code = 200;
-        res.set_header("Content-Type", "image/png");
+        res.set_header("Content-Type", "application/octet-stream");
         res.set_header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
         res.body = file_content;
         return res;
