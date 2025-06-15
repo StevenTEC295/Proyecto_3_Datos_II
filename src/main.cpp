@@ -125,23 +125,12 @@ int main() {
     // {
     //     std::cout << "controller_node.CountDataBytes(start_i, end_i): " << controller_node.CountDataBytes(controller_node.files[i].start_position, controller_node.files[i].end_position) << std::endl;
     // }
-
-    // 78
-    // 7E
-    // 88
-    // 17
-    // 87
-    // E8
-    // 81
-    // 78
-    // 7E
-    // 88
-    // 17
-    // 87
-    // E8
-    // 81
-        
+    
+    
+    
     // Test WriteFile(std::string name, int size, int start, char* data)
+
+    //78//7E//88//17//87//E8//81//78//7E//88//17//87//E8//81
     // Emmy
     char emmy_file[16] = {(char)0x78, (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78,
         (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78, (char)0x7E};
@@ -156,40 +145,8 @@ int main() {
         printf("%02X", (unsigned char)(emmy_file[3*i] ^ emmy_file[3*i+1] ^ emmy_file[3*i+2]));
         std::cout << std::endl;
     }
-    
 
-    // 64
-    // 9B
-    // 57
-    // 16
-    // 49
-    // B5
-    // 71
-    // 64
-    // 9B
-    // 57
-    // 16
-    // 49
-    // B5
-    // 71
-    // 64
-    // 9B
-    // 57
-    // 16
-    // 49
-    // B5
-    // 71
-    // 64
-    // 9B
-    // 57
-    // 16
-    // 49
-    // B5
-    // 71
-
-
-
-
+    //64//9B//57//16//49//B5//71//64//9B//57//16//49//B5//71//64//9B//57//16//49//B5//71//64//9B//57//16//49//B5//71
     // Tilly
     char tilly_file[28] = {(char)0x64, (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64,
         (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64, (char)0x9B,
@@ -279,28 +236,25 @@ int main() {
             /// Saving the file ///
             // This old version saves a file equivalent to the original and with the same name.
             // Guardar el archivo en el sistema
-            std::ofstream out_file(filepath, std::ios::binary);
-            if (!out_file) {
-                return crow::response(500, "Error al crear el archivo en el servidor");
-            }
+            // std::ofstream out_file(filepath, std::ios::binary);
+            // if (!out_file) {
+            //     return crow::response(500, "Error al crear el archivo en el servidor");
+            // }
             
-            out_file.write(part.body.data(), part.body.size());
-            out_file.close();
+            // out_file.write(part.body.data(), part.body.size());
+            // out_file.close();
             
-            saved_files.push_back(unique_filename);
+            // saved_files.push_back(unique_filename);
             
             // New version saves the file into the disks of the raid and creates a matching file entry in the files vector of ControllerNode.
             // Gets a suitable start position to save the file into.
             int file_size = part.body.size();
             for (size_t i = 0; i < file_size; i++)  // For each byte of the incoming message file.
             {
-                int start = controller_node.FindStartPositionTest(filename , file_size);
+                int start = controller_node.FindStartPosition(filename , file_size);
+                controller_node.WriteFile(filename, file_size, start, part.body.data());
 
             }
-            
-            
-
-
             /// Saving the file ///
         }
         
