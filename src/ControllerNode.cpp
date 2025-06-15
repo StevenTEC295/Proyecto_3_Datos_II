@@ -19,6 +19,8 @@ public:
     int disk_size = 4096;
     int disk_amount = 4;
     const char* disk_names[4] = {"disks/disk_node_1.bin", "disks/disk_node_2.bin", "disks/disk_node_3.bin", "disks/disk_node_4.bin"};
+
+    std::vector<bool> working_disks = {true, true, true, true};
     
     // Stores File objects. Used to manage available memory.
     // This vector has to be ordered by start position.
@@ -185,8 +187,6 @@ public:
 
     // Returns a start position to write a file given the name and size.
     // Should not add to files vector.
-    //      Currently adds files as test behaviour.
-    // Returns start position.
     // Returns -1 if the file doesn't fit in memory or it already exists in the files vector.
     // Actual write logic happens when receiving a file from the client.
     int FindStartPosition(std::string name, int size)
@@ -460,7 +460,7 @@ public:
         
     // }
 
-    void WriteFile(std::string name, int size, int start, char* data)
+    void WriteFile(std::string name, int size, int start, const char* data)
     {
         // end is the current position in memory.
         int end = start;
@@ -584,6 +584,13 @@ public:
 
         std::cout << "WriteFile(std::string name, int size, int start) writes: (" << name << ", " << start << ", " << RAID_file_end << ")" << std::endl;
 
+        // Close the disks.
+        for (size_t i = 0; i < disks.size(); i++)
+        {
+            disks[i].close();
+        }
+        
+
     }
 
 
@@ -634,6 +641,140 @@ public:
         }
         return total_bytes;
     }
+
+
+    // Writes 0 in all of a disk's fields (replacement disk) and turns the disk's corresponding flag in the working_disks vector to false.
+    void SimulateDiskFailure(int disk_id)
+    {
+        const char* disk_name = disk_names[disk_id];
+        // 1. Create or open file in binary read/write mode
+        std::fstream disk(disk_name, std::ios::in | std::ios::binary);
+
+        std::vector<char> emptyData(disk_size, 0);  // A disk_size amount of empty bytes.
+        
+        disk.seekp(0, std::ios::beg);  // set write pointer
+        disk.write(emptyData.data(), emptyData.size());
+
+        disk.close();
+
+        working_disks[disk_id] = false;
+    }
+
+    // Repairs the disk that shows as false in the working_disks vector.
+    // If multiple disks are damaged, the code runs for each but the data is lost.
+    void RepairDamagedDisk()
+    {
+        // Gets the disks.
+        std::vector<std::fstream> disks;
+        for (size_t i = 0; i < disk_amount; i++)
+        {
+            // Uses emplace_back because std::fstream is non-copyable.
+            disks.emplace_back(disk_names[i], std::ios::in | std::ios::out | std::ios::binary);
+        }
+        for (size_t disk = 0; disk < disk_amount; disk++)
+        {
+            if (!working_disks[disk])
+            {
+                /* CODE TO REPAIR THE DISKS USING XOR. */
+                
+
+                for (size_t block = 0; block < disk_size; block++)
+                {
+                    std::vector<char> current_block_bytes;
+                    // Get all the data bytes of the current block.
+                    for (size_t current_disk = 0; current_disk < disk_amount; current_disk++)
+                    {
+                        if (working_disks[current_disk])
+                        {
+                            disks[current_disk].seekg(block, std::ios::beg);  // set read pointer.
+                            char buffer[1];
+                            disks[current_disk].read(buffer, sizeof(buffer));
+                            current_block_bytes.push_back(buffer[0]);
+                        }
+                    }
+
+                    char restored_byte = 0x00;
+                    for (size_t current_disk = 0; current_disk < current_block_bytes.size(); current_disk++)
+                    {
+                        restored_byte ^= current_block_bytes[current_disk];
+                    }
+
+                    disks[disk].seekp(block, std::ios::beg);
+                    disks[disk].write(&(restored_byte) , sizeof(char));
+
+        
+                }
+            }
+        }
+    }
+
+
+    // Returns a std::vector<char> of the bytes in the file.
+    std::string GetFile(std::string file_name)
+    {
+        // bool file_found = false;
+        int file_index = -1;
+        for (size_t i = 0; i < files.size(); i++)
+        {
+            if (file_name == files[i].name)
+            {
+                file_index = i;
+                break;
+            }
+        }
+        if (file_index == -1)
+        {
+            std::cout << "GetFile: File not found." << std::endl;
+            std::string no_result;
+            return no_result;
+        }
+        
+        std::vector<char> result;
+        int start = files[file_index].start_position;
+        int end = files[file_index].end_position;
+
+        // Gets the disks.
+        std::vector<std::fstream> disks;
+        for (size_t i = 0; i < disk_amount; i++)
+        {
+            // Uses emplace_back because std::fstream is non-copyable.
+            disks.emplace_back(disk_names[i], std::ios::out | std::ios::binary);
+        }
+        for (size_t i = start; i < end; i++)
+        {
+            disks[i%4].seekg(i/4, std::ios::beg);  // set read pointer.
+            char buffer[1];
+            disks[i].read(buffer, sizeof(buffer));
+            result.push_back(buffer[0]);            
+        }
+        std::string str(result.begin(), result.end());
+        return str;
+    }
+
+    void DeleteFile(std::string file_name)
+    {
+        int file_index = -1;
+        for (size_t i = 0; i < files.size(); i++)
+        {
+            if (file_name == files[i].name)
+            {
+                file_index = i;
+                break;
+            }
+        }
+        if (file_index == -1)
+        {
+            std::cout << "DeleteFile: File not found." << std::endl;
+            return;
+        }
+        files.erase(files.begin() + file_index);
+        std::cout << "Deleted file: " << file_name << std::endl;
+    }
+
+
+
+
+
 
 
 
