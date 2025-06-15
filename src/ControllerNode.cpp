@@ -357,7 +357,7 @@ public:
             }
             else
             {
-                std::cout << "Skipped parity byte." << "start: " << start << ", " << "end: " << end << ", " << "size: " << size << ". " << std::endl;
+                //std::cout << "Skipped parity byte." << "start: " << start << ", " << "end: " << end << ", " << "size: " << size << ". " << std::endl;
             }
             
             end ++;
@@ -568,7 +568,7 @@ public:
             }
             else
             {
-                std::cout << "Skipped parity byte." << "start: " << start << ", " << "end: " << end << ", " << "size: " << size << ", " << "current_data_byte: " << current_data_byte << ". " << std::endl;
+                //std::cout << "Skipped parity byte." << "start: " << start << ", " << "end: " << end << ", " << "size: " << size << ", " << "current_data_byte: " << current_data_byte << ". " << std::endl;
             }
             
             end ++;
@@ -620,7 +620,7 @@ public:
     
     bool ByteIsParity(int byte)
     {
-        std::cout << "if ((byte/4)%4 == byte%4) -> " << (byte/4)%4 << " == " << byte%4 << " -> " << ((byte/4)%4 == byte%4) << std::endl;
+        //std::cout << "if ((byte/4)%4 == byte%4) -> " << (byte/4)%4 << " == " << byte%4 << " -> " << ((byte/4)%4 == byte%4) << std::endl;
         if ((byte/4)%4 == byte%4)
         {
             return true;
@@ -712,6 +712,7 @@ public:
     // Returns a std::vector<char> of the bytes in the file.
     std::string GetFile(std::string file_name)
     {
+        std::cout << "Enters GetFile() with file_name: " << file_name << std::endl;
         // bool file_found = false;
         int file_index = -1;
         for (size_t i = 0; i < files.size(); i++)
@@ -729,6 +730,9 @@ public:
             return no_result;
         }
         
+        std::cout << "GetFile: File found at index: " << file_index << std::endl;
+        ShowFiles();
+
         std::vector<char> result;
         int start = files[file_index].start_position;
         int end = files[file_index].end_position;
@@ -738,20 +742,32 @@ public:
         for (size_t i = 0; i < disk_amount; i++)
         {
             // Uses emplace_back because std::fstream is non-copyable.
-            disks.emplace_back(disk_names[i], std::ios::out | std::ios::binary);
+            disks.emplace_back(disk_names[i], std::ios::in | std::ios::binary);
         }
         for (size_t i = start; i < end; i++)
         {
-            disks[i%4].seekg(i/4, std::ios::beg);  // set read pointer.
-            char buffer[1];
-            disks[i].read(buffer, sizeof(buffer));
-            result.push_back(buffer[0]);            
+            if (!ByteIsParity(i))
+            {    
+                disks[i%4].seekg(i/4, std::ios::beg);  // set read pointer.
+                char buffer[1];
+                disks[i%4].read(buffer, sizeof(buffer));
+                printf("%02X", (unsigned char)buffer[0]);
+                result.push_back(buffer[0]);            
+            }
+            
         }
+        for (size_t i = 0; i < disk_amount; i++)
+        {
+            disks[i].close();
+        }
+        std::cout << "result size: " << result.size() << std::endl;
+
         std::string str(result.begin(), result.end());
+        std::cout << "str size: " << str.size() << std::endl;
         return str;
     }
 
-    void DeleteFile(std::string file_name)
+    bool DeleteFile(std::string file_name)
     {
         int file_index = -1;
         for (size_t i = 0; i < files.size(); i++)
@@ -765,10 +781,11 @@ public:
         if (file_index == -1)
         {
             std::cout << "DeleteFile: File not found." << std::endl;
-            return;
+            return false;
         }
         files.erase(files.begin() + file_index);
         std::cout << "Deleted file: " << file_name << std::endl;
+        return true;
     }
 
 

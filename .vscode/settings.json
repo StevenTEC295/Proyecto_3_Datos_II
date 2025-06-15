@@ -69,6 +69,20 @@
         "__threading_support": "cpp",
         "__verbose_abort": "cpp",
         "ios": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "csignal": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "set": "cpp",
+        "regex": "cpp",
+        "source_location": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "cinttypes": "cpp",
+        "typeindex": "cpp"
     }
 }

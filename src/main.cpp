@@ -48,20 +48,36 @@ std::string generate_unique_filename(const std::string& original_name) {
 
 std::string get_filename_from_headers(const crow::multipart::mph_map& headers) {
     for (const auto& header : headers) {
+        std::cout << "Header: " << header.first << " = " << header.second.value << std::endl;
         if (header.first == "Content-Disposition") {
-            const std::string& content_disp = header.second.value;
-            size_t filename_pos = content_disp.find("filename=\"");
-            if (filename_pos != std::string::npos) {
-                filename_pos += 10; // Longitud de "filename=\""
-                size_t filename_end = content_disp.find("\"", filename_pos);
-                if (filename_end != std::string::npos) {
-                    return content_disp.substr(filename_pos, filename_end - filename_pos);
+            const std::string& value = header.second.value;
+
+            // Buscar filename="..."
+            auto pos = value.find("filename=\"");
+            if (pos != std::string::npos) {
+                pos += 10;
+                auto end = value.find("\"", pos);
+                if (end != std::string::npos)
+                    return value.substr(pos, end - pos);
+            }
+
+            // Buscar filename*=UTF-8''nombre.ext (RFC 5987)
+            pos = value.find("filename*=");
+            if (pos != std::string::npos) {
+                pos += 9;
+                std::string remaining = value.substr(pos);
+                auto charset_pos = remaining.find("''");
+                if (charset_pos != std::string::npos) {
+                    return remaining.substr(charset_pos + 2);  // omitimos el charset
                 }
+                return remaining; // fallback
             }
         }
     }
+
     return "unnamed_file";
 }
+
 
 int main() {
 
@@ -132,7 +148,7 @@ int main() {
 
     //78//7E//88//17//87//E8//81//78//7E//88//17//87//E8//81
     // Emmy
-    char emmy_file[16] = {(char)0x78, (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78,
+    /*char emmy_file[16] = {(char)0x78, (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78,
         (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78, (char)0x7E};
 
     std::cout << "controller_node.WriteFile(\"Emmy\", 16, 0, emmy_file): " << std::endl;
@@ -162,7 +178,7 @@ int main() {
         printf("%02X", (unsigned char)(tilly_file[3*i] ^ tilly_file[3*i+1] ^ tilly_file[3*i+2]));
         std::cout << std::endl;
     }
-    
+    */
 
 
 
@@ -208,7 +224,7 @@ int main() {
             return crow::response(500, "No se pudo crear el directorio de subidas");
         }
 
-        std::cout << req.body << std::endl;
+        //std::cout << req.body << std::endl;
         
         // Parsear el cuerpo de la petición multipart
         crow::multipart::message file_message(req);
@@ -222,40 +238,33 @@ int main() {
         std::vector<std::string> saved_files;
     
 
-        for (const auto& part : file_message.parts) {
-            std::cout << "Parte: " << part.body << std::endl;
-        }
+        
         for (const auto& part : file_message.parts) {
             // Obtener el nombre original del archivo
+
+            //std::cout << "Part name: " << part.headers << std::endl;
             std::string filename = get_filename_from_headers(part.headers);
             
             // Generar un nombre único para el archivo
             std::string unique_filename = generate_unique_filename(filename);
             std::string filepath = upload_dir + "/" + unique_filename;
             
-            /// Saving the file ///
-            // This old version saves a file equivalent to the original and with the same name.
-            // Guardar el archivo en el sistema
-            // std::ofstream out_file(filepath, std::ios::binary);
-            // if (!out_file) {
-            //     return crow::response(500, "Error al crear el archivo en el servidor");
-            // }
-            
-            // out_file.write(part.body.data(), part.body.size());
-            // out_file.close();
-            
-            // saved_files.push_back(unique_filename);
-            
-            // New version saves the file into the disks of the raid and creates a matching file entry in the files vector of ControllerNode.
-            // Gets a suitable start position to save the file into.
-            int file_size = part.body.size();
-            for (size_t i = 0; i < file_size; i++)  // For each byte of the incoming message file.
-            {
-                int start = controller_node.FindStartPosition(filename , file_size);
-                controller_node.WriteFile(filename, file_size, start, part.body.data());
+          
+
+            if (part.body.size() != 0){
+                int start = controller_node.FindStartPosition(filename , part.body.size());
+                if (start == -1) {
+                    return crow::response(500, "No hay suficiente espacio para guardar el archivo o el archivo ya existe");
+                }
+                else
+                {
+                    std::cout << "controller_node.WriteFile(\"" << filename << "\", " << part.body.size() << ", " << start << ")" << std::endl;
+                    controller_node.WriteFile(filename, part.body.size(), start, part.body.data());
+                    controller_node.ShowFiles();
+                }
 
             }
-            /// Saving the file ///
+            
         }
         
         // Construir respuesta JSON
@@ -274,30 +283,29 @@ int main() {
         return "retornando los files";
     });
     CROW_ROUTE(app, "/get_file/<string>").methods("GET"_method)
-    ([](std::string filename){
+    ([&controller_node](std::string filename){
 
-        std::string filepath = "uploads/" + filename;
-        std::ifstream file(filepath, std::ios::binary);
-        
-            if (!file.is_open()) {
-            return crow::response(404, "Archivo no encontrado");
-        }
+       
 
         // Leer contenido
-        std::ostringstream buffer;
-        buffer << file.rdbuf();
-        std::string file_content = buffer.str();
+        std::string file_content = controller_node.GetFile(filename);
 
         crow::response res;
         res.code = 200;
-        res.set_header("Content-Type", "application/octet-stream");
+        res.set_header("Content-Type", "image/png");
         res.set_header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
         res.body = file_content;
         return res;
     });
     CROW_ROUTE(app, "/delete_file/<string>").methods("DELETE"_method)
-    ([](std::string filename){
-        return "eliminando el file "+ filename;
+    ([&controller_node](std::string filename){
+        
+        // Lógica para eliminar el archivo
+        if (controller_node.DeleteFile(filename)) {
+            return crow::response(200, "Archivo eliminado correctamente");
+        } else {
+            return crow::response(404, "Archivo no encontrado");
+        }
     });
 
     // Configurar y ejecutar el servidor
