@@ -126,6 +126,92 @@ int main() {
     //     std::cout << "controller_node.CountDataBytes(start_i, end_i): " << controller_node.CountDataBytes(controller_node.files[i].start_position, controller_node.files[i].end_position) << std::endl;
     // }
 
+    // 78
+    // 7E
+    // 88
+    // 17
+    // 87
+    // E8
+    // 81
+    // 78
+    // 7E
+    // 88
+    // 17
+    // 87
+    // E8
+    // 81
+        
+    // Test WriteFile(std::string name, int size, int start, char* data)
+    // Emmy
+    char emmy_file[16] = {(char)0x78, (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78,
+        (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78, (char)0x7E};
+
+    std::cout << "controller_node.WriteFile(\"Emmy\", 16, 0, emmy_file): " << std::endl;
+    controller_node.WriteFile("Emmy", 16, 0, emmy_file);
+    controller_node.ShowFiles();
+    controller_node.DisplayDisks(0,64);
+    
+    for (size_t i = 0; i < 5; i++)
+    {
+        printf("%02X", (unsigned char)(emmy_file[3*i] ^ emmy_file[3*i+1] ^ emmy_file[3*i+2]));
+        std::cout << std::endl;
+    }
+    
+
+    // 64
+    // 9B
+    // 57
+    // 16
+    // 49
+    // B5
+    // 71
+    // 64
+    // 9B
+    // 57
+    // 16
+    // 49
+    // B5
+    // 71
+    // 64
+    // 9B
+    // 57
+    // 16
+    // 49
+    // B5
+    // 71
+    // 64
+    // 9B
+    // 57
+    // 16
+    // 49
+    // B5
+    // 71
+
+
+
+
+    // Tilly
+    char tilly_file[28] = {(char)0x64, (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64,
+        (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64, (char)0x9B,
+        (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64, (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71};
+
+    std::cout << "controller_node.WriteFile(\"Tilly\", 16, 0, tilly_file): " << std::endl;
+    controller_node.WriteFile("Tilly", 28, 32, tilly_file);
+    controller_node.ShowFiles();
+    controller_node.DisplayDisks(0,64);
+    
+    for (size_t i = 0; i < 7; i++)
+    {
+        printf("%02X", (unsigned char)(tilly_file[3*i] ^ tilly_file[3*i+1] ^ tilly_file[3*i+2]));
+        std::cout << std::endl;
+    }
+    
+
+
+
+
+
+
 
     // return 0;
 
@@ -156,7 +242,7 @@ int main() {
     });
     
     // Ruta para subir archivos
-    CROW_ROUTE(app, "/upload").methods("POST"_method)([](const crow::request& req){
+    CROW_ROUTE(app, "/upload").methods("POST"_method)([&controller_node](const crow::request& req){
         // Directorio donde se guardarán los archivos
         const std::string upload_dir = "pdfs";
         
@@ -205,8 +291,14 @@ int main() {
             
             // New version saves the file into the disks of the raid and creates a matching file entry in the files vector of ControllerNode.
             // Gets a suitable start position to save the file into.
-            int size = part.body.size();
-            // controller_node.FindStartPositionTest("Emmy" , 64)
+            int file_size = part.body.size();
+            for (size_t i = 0; i < file_size; i++)  // For each byte of the incoming message file.
+            {
+                int start = controller_node.FindStartPositionTest(filename , file_size);
+
+            }
+            
+            
 
 
             /// Saving the file ///

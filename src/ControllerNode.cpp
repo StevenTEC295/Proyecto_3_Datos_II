@@ -371,6 +371,245 @@ public:
         std::cout << "WriteFileTest(std::string name, int size, int start) writes: (" << name << ", " << start << ", " << end << ")" << std::endl;
 
     }
+
+
+
+
+
+
+
+
+    // // Writes a file to the disks and calculates parity bytes.
+    // // Writes per block.
+    // // Adds a RAIDFile object to the files vector.
+    // void WriteFile(std::string name, int size, int start, char* data)
+    // {
+    //     // end is the current position in memory.
+    //     int end = start;
+
+
+    //     while (size > 0)
+    //     {    
+    //         // Calculates a std::vector<char> with the data bytes of the current block.
+
+
+    //         // Number of bytes needed for the current block.
+    //         int start_of_next_block = (end+4) - (end)%4;
+    //         int number_of_bytes_for_current_block = CountDataBytes(end, start_of_next_block);
+    //         if (number_of_bytes_for_current_block > size)
+    //         {
+    //             // number_of_bytes_for_current_block can't ask for more
+    //             number_of_bytes_for_current_block = size;
+    //         }
+            
+
+    //         std::vector<char> current_block_bytes;
+    //         for (size_t i = 0; i < disk_amount; i++)
+    //         {
+    //             if (!ByteIsParity(end + i))
+    //             {
+    //                 current_block_bytes.push_back(data[])
+    //             }
+    //         }
+        
+        
+    //         // and the parity byte/////////////       
+        
+    //     }
+
+    //     /////////////////////////////////////////////////
+    //     while (size > 0)
+    //     {
+    //         if (!ByteIsParity(end))
+    //         {
+    //             size --;
+    //         }
+    //         else
+    //         {
+    //             std::cout << "Skipped parity byte." << "start: " << start << ", " << "end: " << end << ", " << "size: " << size << ". " << std::endl;
+    //         }
+            
+    //         end ++;
+    //     }
+    //     RAIDFile file_to_add(name, start, end);
+    //     files.push_back(file_to_add);
+    //     std::sort(files.begin(), files.end(), [](const RAIDFile& a, const RAIDFile& b) {
+    //         return a.start_position < b.start_position;
+    //     });
+
+    //     std::cout << "WriteFileTest(std::string name, int size, int start) writes: (" << name << ", " << start << ", " << end << ")" << std::endl;
+
+    // }
+
+    // void CalculateParityByte(int start)
+    // {
+    //     // moves start position to the beginning of the block.
+    //     start -= start%4;
+    //     char result = 0x00;
+        
+    //     std::vector<char> disk_bytes;
+    //     for (size_t i = 0; i < disk_amount; i++)
+    //     {
+    //         if (!ByteIsParity(start + i))
+    //         {
+    //             disk_bytes.push_back()
+    //         }
+            
+    //     }
+        
+        
+    // }
+
+    void WriteFile(std::string name, int size, int start, char* data)
+    {
+        // end is the current position in memory.
+        int end = start;
+        // current_data_byte index of the bytes in data.
+        int current_data_byte = 0;
+        // Calculated an iteration after writing the last byte.
+        int RAID_file_end = -1;
+
+        // Old writing logic.
+        /////////////////////////////////////////////////
+        // while (current_data_byte < size)
+        // {    
+        //     // Calculates a std::vector<char> with the data bytes of the current block.
+
+
+        //     // Number of bytes needed for the current block.
+        //     int start_of_next_block = (end+4) - (end)%4;
+        //     int number_of_bytes_for_current_block = CountDataBytes(end, start_of_next_block);
+        //     if (number_of_bytes_for_current_block > size)
+        //     {
+        //         // number_of_bytes_for_current_block can't ask for more
+        //         number_of_bytes_for_current_block = size;
+        //     }
+            
+
+        //     std::vector<char> current_block_bytes;
+        //     for (size_t i = 0; i < disk_amount; i++)
+        //     {
+        //         if (!ByteIsParity(end + i))
+        //         {
+        //             // current_block_bytes.push_back(data[])
+        //         }
+        //     }
+        
+        
+        //     // and the parity byte/////////////       
+        
+        // }
+
+        /////////////////////////////////////////////////
+        // Gets the disks.
+        std::vector<std::fstream> disks;
+        for (size_t i = 0; i < disk_amount; i++)
+        {
+            // Uses emplace_back because std::fstream is non-copyable.
+            disks.emplace_back(disk_names[i], std::ios::in | std::ios::out | std::ios::binary);
+        }
+
+        // Variables to trigger parity calculation.
+        int current_block = end/4;
+        bool current_block_parity_is_calculated = true;
+        while (current_data_byte <= size)
+        {
+            // Write previous block's parity (last block's parity is written individually after while loop).
+            // if parity has to be updated and is moving to the next block.
+            if ((!current_block_parity_is_calculated && current_block != end/4) || current_data_byte == size)
+            {
+                // Special case for last written bit (which was written the last iteration).
+                if (current_data_byte == size)
+                {
+                    // Store the end in memory of the file for creating the RAID_file object.
+                    RAID_file_end = end;
+                    // make end jump to the next block to use the same logic.
+                    end = end - end%4 + 4;
+                }
+                
+                // Block's data bytes.
+                std::vector<char> current_block_bytes;
+                // Get all the data bytes of the previous block.
+                for (size_t i = 0; i < disk_amount; i++)
+                {
+                    if (!ByteIsParity(end - 4 + i))
+                    {
+                        disks[i].seekg(current_block, std::ios::beg);  // set read pointer.
+                        char buffer[1];
+                        disks[i].read(buffer, sizeof(buffer));
+                        current_block_bytes.push_back(buffer[0]);
+                    }
+                }
+                // Find current_parity_disk as previous block %4.
+                int current_parity_disk = (end/4 -1)%4;
+                // At previous block
+                disks[current_parity_disk].seekp(end/4 -1, std::ios::beg);
+                // write.
+                char parity_byte_value = CalculateParityByte(current_block_bytes);
+                disks[current_parity_disk].write(&(parity_byte_value), sizeof(char));
+
+                current_block_parity_is_calculated = true;
+                current_block = end/4;
+
+                if (current_data_byte == size)
+                {
+                    break;
+                }
+            }
+            
+
+            if (!ByteIsParity(end))
+            {
+                disks[end%4].seekp(end/4, std::ios::beg);
+                disks[end%4].write(&(data[current_data_byte]) , sizeof(char));
+                // size --;
+                current_data_byte ++;
+                current_block_parity_is_calculated = false;
+            }
+            else
+            {
+                std::cout << "Skipped parity byte." << "start: " << start << ", " << "end: " << end << ", " << "size: " << size << ", " << "current_data_byte: " << current_data_byte << ". " << std::endl;
+            }
+            
+            end ++;
+        }
+
+        // Save a corresponding RAIDFile object to the files vector.
+        RAIDFile file_to_add(name, start, RAID_file_end);
+        files.push_back(file_to_add);
+        // Sorts the files vector by start_position (necessary for allocating memory for new files).
+        std::sort(files.begin(), files.end(), [](const RAIDFile& a, const RAIDFile& b) {
+            return a.start_position < b.start_position;
+        });
+
+        std::cout << "WriteFile(std::string name, int size, int start) writes: (" << name << ", " << start << ", " << RAID_file_end << ")" << std::endl;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    // Receives the non parity bytes of the current block and returns a parity byte using XOR on each. 
+    char CalculateParityByte(std::vector<char> bytes)
+    {
+        char parity_byte = 0x00;
+        for (size_t i = 0; i < bytes.size(); i++)
+        {
+            parity_byte ^= bytes[i];
+        }
+        
+        return parity_byte;
+    }
+
+
     
     bool ByteIsParity(int byte)
     {
