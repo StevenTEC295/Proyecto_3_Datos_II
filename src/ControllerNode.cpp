@@ -88,7 +88,7 @@ public:
             disk.close();
         }
 
-        std::cout << "Exits TestDisks() with 0. Wrote bytes to the disks at 32." << std::endl;
+        // std::cout << "Exits TestDisks() with 0. Wrote bytes to the disks at 32." << std::endl;   // Does not.
         return 0;
     }
 
@@ -284,7 +284,7 @@ public:
     // Fails if files vector is empty.
     int FindAllocableSpace(int size, int start)
     {
-        std::cout << "Enters FindAllocableSpace with (size, start): " << size << " (, " << start << ")" << std::endl;
+        // std::cout << "Enters FindAllocableSpace with (size, start): (" << size << ", " << start << ")" << std::endl;
         // Find nearest occupied byte after start.
         int closest_allocated_byte = files[0].start_position;
         int closest_allocated_byte_index = 0;
@@ -296,7 +296,7 @@ public:
             }
             closest_allocated_byte = files[i].start_position;
             closest_allocated_byte_index = i;
-            std::cout << "closest_allocated_byte = " << closest_allocated_byte << "; at " << closest_allocated_byte_index << "." << std::endl;
+            // std::cout << "closest_allocated_byte = " << closest_allocated_byte << "; at " << closest_allocated_byte_index << "." << std::endl;
         }
 
         // std::cout << "FindAllocableSpace CP 1" << std::endl;
@@ -342,7 +342,7 @@ public:
 
 
 
-            std::cout << "Reenters FindAllocableSpace with start = files[" << closest_allocated_byte_index << "].end_position: " << files[closest_allocated_byte_index].end_position << std::endl;
+            // std::cout << "Reenters FindAllocableSpace with start = files[" << closest_allocated_byte_index << "].end_position: " << files[closest_allocated_byte_index].end_position << std::endl;
             return FindAllocableSpace(size, files[closest_allocated_byte_index].end_position);
         }
     }
@@ -600,7 +600,7 @@ public:
         
         std::cout << "DisplayDisks(0, 32)" << std::endl;
         DisplayDisks(0, 32);
-        std::cout << "DisplayDisks(0, 32)" << std::endl;
+        // std::cout << "DisplayDisks(0, 32)" << std::endl;
     }
 
 
@@ -618,16 +618,16 @@ public:
     char CalculateParityByte(std::vector<char> bytes)
     {
         char parity_byte = 0x00;
-        std::cout << "at CalculateParityByte, data bytes: ";
+        // std::cout << "at CalculateParityByte, data bytes: ";
         for (size_t i = 0; i < bytes.size(); i++)
         {
-            printf("%02X", (unsigned char)bytes[i]);
-            std::cout << ", ";
+            // printf("%02X", (unsigned char)bytes[i]);
+            // std::cout << ", ";
             parity_byte ^= bytes[i];
         }
-        std::cout << "-> ";
-        printf("%02X", (unsigned char)parity_byte);
-        std::cout << std::endl;
+        // std::cout << "-> ";
+        // printf("%02X", (unsigned char)parity_byte);
+        // std::cout << std::endl;
         
         return parity_byte;
     }
@@ -649,10 +649,11 @@ public:
     // Returns the total of bytes used in memory.
     int ShowFiles()
     {
+        std::cout << "ShowFiles: (filename, start, end)" << std::endl;
         int total_bytes = 0;
         for (size_t i = 0; i < files.size(); i++)
         {   
-            std::cout << "files[i]: (" << files[i].name << ", " << files[i].start_position << ", " << files[i].end_position << ")" << std::endl;
+            std::cout << "files[" << i << "]: (" << files[i].name << ", " << files[i].start_position << ", " << files[i].end_position << ")" << std::endl;
             total_bytes += files[i].end_position - files[i].start_position;
         }
         return total_bytes;
@@ -752,7 +753,7 @@ public:
 
         std::cout << "DisplayDisks(0, 32) repair" << std::endl;
         DisplayDisks(0, 32);
-        std::cout << "DisplayDisks(0, 32) repair" << std::endl;
+        // std::cout << "DisplayDisks(0, 32) repair" << std::endl;
 
     }
 
@@ -873,7 +874,7 @@ public:
         
         std::cout << "DisplayDisks(0, 32)" << std::endl;
         DisplayDisks(0, 32);
-        std::cout << "DisplayDisks(0, 32)" << std::endl;
+        // std::cout << "DisplayDisks(0, 32)" << std::endl;
 
         return str;
     }
@@ -899,7 +900,7 @@ public:
 
         std::cout << "DisplayDisks(0, 32)" << std::endl;
         DisplayDisks(0, 32);
-        std::cout << "DisplayDisks(0, 32)" << std::endl;
+        // std::cout << "DisplayDisks(0, 32)" << std::endl;
 
         return true;
     }

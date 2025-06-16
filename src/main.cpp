@@ -229,7 +229,7 @@ int main() {
             return crow::response(500, "No se pudo crear el directorio de subidas");
         }
 
-        std::cout << req.body << std::endl;
+        // std::cout << req.body << std::endl;
         
         // Parsear el cuerpo de la petición multipart
         crow::multipart::message file_message(req);
@@ -294,6 +294,7 @@ int main() {
 
         // Leer contenido
         std::string file_content = controller_node.GetFile(filename);
+        controller_node.ShowFiles();
 
         if (file_content == "File not found.") {
             return crow::response(404, "Archivo no encontrado");
@@ -309,9 +310,13 @@ int main() {
     ([&controller_node](std::string filename){
         
         // Lógica para eliminar el archivo
-        if (controller_node.DeleteFile(filename)) {
+        if (controller_node.DeleteFile(filename))
+        {
+            controller_node.ShowFiles();
             return crow::response(200, "Archivo eliminado correctamente");
-        } else {
+        } else
+        {
+            controller_node.ShowFiles();
             return crow::response(404, "Archivo no encontrado");
         }
     });
