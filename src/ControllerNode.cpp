@@ -16,7 +16,8 @@ class ControllerNode
 {
 public:
     
-    int disk_size = 4096;
+    // int disk_size = 4096;
+    int disk_size = 32768;
     int disk_amount = 4;
     const char* disk_names[4] = {"disks/disk_node_1.bin", "disks/disk_node_2.bin", "disks/disk_node_3.bin", "disks/disk_node_4.bin"};
 
@@ -283,25 +284,27 @@ public:
     // Fails if files vector is empty.
     int FindAllocableSpace(int size, int start)
     {
+        std::cout << "Enters FindAllocableSpace with (size, start): " << size << " (, " << start << ")" << std::endl;
         // Find nearest occupied byte after start.
         int closest_allocated_byte = files[0].start_position;
         int closest_allocated_byte_index = 0;
         for (size_t i = 1; i < files.size(); i++)
         {
-            if (closest_allocated_byte > start)
+            if (closest_allocated_byte >= start)
             {
                 break;
             }
             closest_allocated_byte = files[i].start_position;
             closest_allocated_byte_index = i;
+            std::cout << "closest_allocated_byte = " << closest_allocated_byte << "; at " << closest_allocated_byte_index << "." << std::endl;
         }
 
-        std::cout << "FindAllocableSpace CP 1" << std::endl;
+        // std::cout << "FindAllocableSpace CP 1" << std::endl;
 
         // If no allocated bytes were found in fron of start (i. e. limit is the end of the disks).
         if (start > closest_allocated_byte)
         {
-            if (CountDataBytes(start, disk_size) >= size)
+            if (CountDataBytes(start, disk_size*disk_amount) >= size)
             {
                 std::cout << "From FindAllocableSpace() an available block to store (" << size << ") bytes was found at memory position (" << start << ")."; 
                 std::cout << " Found block is last in memory." << std::endl;
@@ -316,7 +319,7 @@ public:
             
         }
         
-        std::cout << "FindAllocableSpace CP 2" << std::endl;
+        // std::cout << "FindAllocableSpace CP 2" << std::endl;
 
         // If the space between my current position (start) and the first already allocated byte can fit the file.
         if (CountDataBytes(start, closest_allocated_byte) >= size)
@@ -327,14 +330,14 @@ public:
         }
         else
         {
-            std::cout << "FindAllocableSpace CP 3" << std::endl;
+            // std::cout << "FindAllocableSpace CP 3" << std::endl;
 
-            std::cout << "Show files" << std::endl;
-            for (size_t i = 0; i < files.size(); i++)
-            {
+            // std::cout << "Show files" << std::endl;
+            // for (size_t i = 0; i < files.size(); i++)
+            // {
                 
-                std::cout << "files[i]: (" << files[i].name << ", " << files[i].start_position << ", " << files[i].end_position << ")" << std::endl;
-            }
+            //     std::cout << "files[i]: (" << files[i].name << ", " << files[i].start_position << ", " << files[i].end_position << ")" << std::endl;
+            // }
             
 
 
@@ -462,6 +465,7 @@ public:
 
     void WriteFile(std::string name, int size, int start, const char* data)
     {
+        RepairDamagedDisk();
         // end is the current position in memory.
         int end = start;
         // current_data_byte index of the bytes in data.
@@ -514,17 +518,21 @@ public:
         bool current_block_parity_is_calculated = true;
         while (current_data_byte <= size)
         {
+            // std::cout << "current_data_byte = " << current_data_byte << std::endl;
+            // std::cout << "end = " << end << std::endl;
             // Write previous block's parity (last block's parity is written individually after while loop).
             // if parity has to be updated and is moving to the next block.
             if ((!current_block_parity_is_calculated && current_block != end/4) || current_data_byte == size)
             {
-                // Special case for last written bit (which was written the last iteration).
+                // std::cout << "(!current_block_parity_is_calculated && current_block != end/4) || current_data_byte == size -> " << !current_block_parity_is_calculated << "&&" << (current_block != end/4) << "||" << (current_data_byte == size) << std::endl;
+                
+                // Special case for last written bytes (which were written on the a block without jumping to the next).
                 if (current_data_byte == size)
                 {
                     // Store the end in memory of the file for creating the RAID_file object.
                     RAID_file_end = end;
                     // make end jump to the next block to use the same logic.
-                    end = end - end%4 + 4;
+                    end = (end-1) - (end-1)%4 + 4;
                 }
                 
                 // Block's data bytes.
@@ -532,7 +540,7 @@ public:
                 // Get all the data bytes of the previous block.
                 for (size_t i = 0; i < disk_amount; i++)
                 {
-                    if (!ByteIsParity(end - 4 + i))
+                    if (!ByteIsParity((end - end%4) - 4 + i))   // - end%4 is necessary in the case where there are two consecutive parity bytes and the file starts writing on the first one. 
                     {
                         disks[i].seekg(current_block, std::ios::beg);  // set read pointer.
                         char buffer[1];
@@ -590,7 +598,9 @@ public:
             disks[i].close();
         }
         
-
+        std::cout << "DisplayDisks(0, 32)" << std::endl;
+        DisplayDisks(0, 32);
+        std::cout << "DisplayDisks(0, 32)" << std::endl;
     }
 
 
@@ -608,10 +618,16 @@ public:
     char CalculateParityByte(std::vector<char> bytes)
     {
         char parity_byte = 0x00;
+        std::cout << "at CalculateParityByte, data bytes: ";
         for (size_t i = 0; i < bytes.size(); i++)
         {
+            printf("%02X", (unsigned char)bytes[i]);
+            std::cout << ", ";
             parity_byte ^= bytes[i];
         }
+        std::cout << "-> ";
+        printf("%02X", (unsigned char)parity_byte);
+        std::cout << std::endl;
         
         return parity_byte;
     }
@@ -660,58 +676,148 @@ public:
         working_disks[disk_id] = false;
     }
 
+
+
+
+
+
+
+
+
+
+
     // Repairs the disk that shows as false in the working_disks vector.
     // If multiple disks are damaged, the code runs for each but the data is lost.
     void RepairDamagedDisk()
     {
+        // Gets the disks. Absent disk fails.
+        std::vector<std::fstream> disks;
+        int failing_disk_id = -1;
+        for (size_t i = 0; i < disk_amount; i++)
+        {
+            // Adds a std::fstream to the disks vector only if it could open (file exists).
+            std::fstream stream(disk_names[i], std::ios::in | std::ios::out | std::ios::binary);
+
+            if (!stream.is_open()) {
+                std::cout << "At RepairDamagedDisk(), failing_disk_id = " << i << std::endl;
+                failing_disk_id = i;
+                // Don't add it to disks
+            } else {
+                disks.emplace_back(std::move(stream));  // Only store valid streams
+            }
+        }
+        // If a failing disk wasn't found.
+        if (failing_disk_id == -1)
+        {
+            std::cout << "No disks are damaged." << std::endl;
+            return;
+        }
+        
+        // Create a char vector to store in a replacement disk.
+        std::vector<char> replacement_data;
+        // For all the blocks in a disk
+        for (size_t block = 0; block < disk_size; block++)
+        {
+            std::vector<char> current_block_bytes;
+            // Get all the data bytes of the current block.
+            for (size_t current_disk = 0; current_disk < disks.size(); current_disk++)
+            {
+                disks[current_disk].seekg(block, std::ios::beg);  // set read pointer.
+                char buffer[1];
+                disks[current_disk].read(buffer, sizeof(buffer));
+                current_block_bytes.push_back(buffer[0]);
+            }
+
+            char restored_byte = 0x00;
+            for (size_t current_disk = 0; current_disk < current_block_bytes.size(); current_disk++)
+            {
+                restored_byte ^= current_block_bytes[current_disk];
+            }
+
+            replacement_data.push_back(restored_byte);
+            // disks[disk].seekp(block, std::ios::beg);
+            // disks[disk].write(&(restored_byte) , sizeof(char));
+
+        }
+
+        std::ofstream createFile(disk_names[failing_disk_id], std::ios::binary);
+        createFile.write(replacement_data.data(), replacement_data.size());
+        createFile.close();
+        std::cout << "Disk " << failing_disk_id << " restored succesfully." << std::endl;
+
+        for (size_t i = 0; i < disks.size(); i++)
+        {
+            disks[i].close();
+        }
+
+        std::cout << "DisplayDisks(0, 32) repair" << std::endl;
+        DisplayDisks(0, 32);
+        std::cout << "DisplayDisks(0, 32) repair" << std::endl;
+
+    }
+
+    // accidentally modified ):
+    void RepairDamagedDiskTest()
+    {
         // Gets the disks.
         std::vector<std::fstream> disks;
+        int missing_disk_id = -1;
         for (size_t i = 0; i < disk_amount; i++)
         {
             // Uses emplace_back because std::fstream is non-copyable.
             disks.emplace_back(disk_names[i], std::ios::in | std::ios::out | std::ios::binary);
+            if (!disks[i].is_open())
+            {
+                disks.pop_back();
+                missing_disk_id = i;
+            }
+            
         }
+        if (missing_disk_id == -1)
+        {
+            std::cout << "No missing disks." << std::endl;
+            return;
+        }
+        
+        // Create a vector of char to write into the replacement disk.
+
         for (size_t disk = 0; disk < disk_amount; disk++)
         {
-            if (!working_disks[disk])
+            // For all the blocks in the disk
+            for (size_t block = 0; block < disk_size; block++)
             {
-                /* CODE TO REPAIR THE DISKS USING XOR. */
-                
-
-                for (size_t block = 0; block < disk_size; block++)
+                std::vector<char> current_block_bytes;
+                // Get all the data bytes of the current block.
+                for (size_t current_disk = 0; current_disk < disks.size(); current_disk++)
                 {
-                    std::vector<char> current_block_bytes;
-                    // Get all the data bytes of the current block.
-                    for (size_t current_disk = 0; current_disk < disk_amount; current_disk++)
-                    {
-                        if (working_disks[current_disk])
-                        {
-                            disks[current_disk].seekg(block, std::ios::beg);  // set read pointer.
-                            char buffer[1];
-                            disks[current_disk].read(buffer, sizeof(buffer));
-                            current_block_bytes.push_back(buffer[0]);
-                        }
-                    }
-
-                    char restored_byte = 0x00;
-                    for (size_t current_disk = 0; current_disk < current_block_bytes.size(); current_disk++)
-                    {
-                        restored_byte ^= current_block_bytes[current_disk];
-                    }
-
-                    disks[disk].seekp(block, std::ios::beg);
-                    disks[disk].write(&(restored_byte) , sizeof(char));
-
-        
+                    disks[current_disk].seekg(block, std::ios::beg);  // set read pointer.
+                    char buffer[1];
+                    disks[current_disk].read(buffer, sizeof(buffer));
+                    current_block_bytes.push_back(buffer[0]);
                 }
+
+                char restored_byte = 0x00;
+                for (size_t current_disk = 0; current_disk < current_block_bytes.size(); current_disk++)
+                {
+                    restored_byte ^= current_block_bytes[current_disk];
+                }
+    
             }
         }
     }
 
 
+
+
+
+
+
+
     // Returns a std::vector<char> of the bytes in the file.
     std::string GetFile(std::string file_name)
     {
+        RepairDamagedDisk();
+
         std::cout << "Enters GetFile() with file_name: " << file_name << std::endl;
         // bool file_found = false;
         int file_index = -1;
@@ -763,7 +869,12 @@ public:
         std::cout << "result size: " << result.size() << std::endl;
 
         std::string str(result.begin(), result.end());
-        std::cout << "str size: " << str.size() << std::endl;
+        // std::cout << "str size: " << str.size() << std::endl;
+        
+        std::cout << "DisplayDisks(0, 32)" << std::endl;
+        DisplayDisks(0, 32);
+        std::cout << "DisplayDisks(0, 32)" << std::endl;
+
         return str;
     }
 
@@ -785,6 +896,11 @@ public:
         }
         files.erase(files.begin() + file_index);
         std::cout << "Deleted file: " << file_name << std::endl;
+
+        std::cout << "DisplayDisks(0, 32)" << std::endl;
+        DisplayDisks(0, 32);
+        std::cout << "DisplayDisks(0, 32)" << std::endl;
+
         return true;
     }
 
