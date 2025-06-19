@@ -47,31 +47,151 @@ std::string generate_unique_filename(const std::string& original_name) {
 }
 
 std::string get_filename_from_headers(const crow::multipart::mph_map& headers) {
-    for (const auto& header : headers) {
-        if (header.first == "Content-Disposition") {
-            const std::string& content_disp = header.second.value;
-            size_t filename_pos = content_disp.find("filename=\"");
-            if (filename_pos != std::string::npos) {
-                filename_pos += 10; // Longitud de "filename=\""
-                size_t filename_end = content_disp.find("\"", filename_pos);
-                if (filename_end != std::string::npos) {
-                    return content_disp.substr(filename_pos, filename_end - filename_pos);
-                }
-            }
+    auto it = headers.find("Content-Disposition");
+    if (it != headers.end()) {
+        const auto& header_value = it->second.value;
+        const auto& params = it->second.params;
+
+        std::cout << "[DEBUG] Content-Disposition: " << header_value << std::endl;
+
+        auto filename_it = params.find("filename");
+        if (filename_it != params.end()) {
+            std::cout << "[DEBUG] Filename param found: " << filename_it->second << std::endl;
+            return filename_it->second;
         }
     }
     return "unnamed_file";
 }
+// std::string get_filename_from_headers(const std::unordered_map<std::string, std::string>& headers) {
+//     auto it = headers.find("Content-Disposition");
+//     if (it != headers.end()) {
+//         std::string content_disposition = it->second;
+
+//         // Find 'filename="'
+//         std::string key = "filename=\"";
+//         size_t start = content_disposition.find(key);
+//         if (start != std::string::npos) {
+//             start += key.length();
+//             size_t end = content_disposition.find("\"", start);
+//             if (end != std::string::npos) {
+//                 return content_disposition.substr(start, end - start);
+//             }
+//         }
+//     }
+//     return "unknown";
+// }
+
+
+
 
 int main() {
 
     ControllerNode controller_node;
     controller_node.TestDisks();
+
+    std::cout << "DisplayDisks(0, 64)" << std::endl;
+    controller_node.DisplayDisks(0, 64);
     
-    controller_node.DisplayDisks();
+    // // Test CountCheckDisks(start, end):
+    // std::cout << "controller_node.CountCheckBytes(11, 15): " << controller_node.CountCheckBytes(11, 15) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 16): " << controller_node.CountCheckBytes(11, 16) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 17): " << controller_node.CountCheckBytes(11, 17) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 18): " << controller_node.CountCheckBytes(11, 18) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 20): " << controller_node.CountCheckBytes(11, 20) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 21): " << controller_node.CountCheckBytes(11, 21) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 22): " << controller_node.CountCheckBytes(11, 22) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 23): " << controller_node.CountCheckBytes(11, 23) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 24): " << controller_node.CountCheckBytes(11, 24) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 25): " << controller_node.CountCheckBytes(11, 25) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 26): " << controller_node.CountCheckBytes(11, 26) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 27): " << controller_node.CountCheckBytes(11, 27) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 28): " << controller_node.CountCheckBytes(11, 28) << std::endl;
+    // std::cout << "controller_node.CountCheckBytes(11, 29): " << controller_node.CountCheckBytes(11, 29) << std::endl;
+
+
+    // // Test CountDataBytes(start, end):
+    // std::cout << "controller_node.CountDataBytes(11, 15): " << controller_node.CountDataBytes(11, 15) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 16): " << controller_node.CountDataBytes(11, 16) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 17): " << controller_node.CountDataBytes(11, 17) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 18): " << controller_node.CountDataBytes(11, 18) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 20): " << controller_node.CountDataBytes(11, 20) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 21): " << controller_node.CountDataBytes(11, 21) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 22): " << controller_node.CountDataBytes(11, 22) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 23): " << controller_node.CountDataBytes(11, 23) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 24): " << controller_node.CountDataBytes(11, 24) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 25): " << controller_node.CountDataBytes(11, 25) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 26): " << controller_node.CountDataBytes(11, 26) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 27): " << controller_node.CountDataBytes(11, 27) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 28): " << controller_node.CountDataBytes(11, 28) << std::endl;
+    // std::cout << "controller_node.CountDataBytes(11, 29): " << controller_node.CountDataBytes(11, 29) << std::endl;
+
+
+    // Test FindStartPosition(size, start):
+    // std::cout << "controller_node.FindStartPosition(\"Emmy\" , 64): " << controller_node.FindStartPosition("Emmy" , 64) << std::endl;
+
+
+    // // Test FindStartPositionTest(size, start):
+    // std::cout << "controller_node.FindStartPositionTest(\"Emmy\" , 64): " << controller_node.FindStartPositionTest("Emmy" , 64) << std::endl;
+    // std::cout << "controller_node.FindStartPositionTest(\"Franny\" , 128): " << controller_node.FindStartPositionTest("Franny" , 128) << std::endl;
+    // std::cout << "controller_node.FindStartPositionTest(\"Molly\" , 256): " << controller_node.FindStartPositionTest("Molly" , 256) << std::endl;
+    // std::cout << "controller_node.FindStartPositionTest(\"Molly\" , 256): " << controller_node.FindStartPositionTest("Amy" , 1024) << std::endl;
+
+    // //?
+    // // std::cout << "controller_node.CountDataBytes(0, controller_node.ShowFiles()): " << controller_node.CountDataBytes(0, controller_node.ShowFiles()) << std::endl;
+    // controller_node.ShowFiles();
+    // std::cout << "Total bytes to allocate: " << 64 + 128 + 256 + 1024 << std::endl;
+    // std::cout << "controller_node.CountDataBytes(0, 1962): " << controller_node.CountDataBytes(0, 1962) << std::endl;
+
+    // for (size_t i = 0; i < controller_node.files.size(); i++)
+    // {
+    //     std::cout << "controller_node.CountDataBytes(start_i, end_i): " << controller_node.CountDataBytes(controller_node.files[i].start_position, controller_node.files[i].end_position) << std::endl;
+    // }
+    
+    
+    
+    // Test WriteFile(std::string name, int size, int start, char* data)
+
+    //78//7E//88//17//87//E8//81//78//7E//88//17//87//E8//81
+    // Emmy
+    /*char emmy_file[16] = {(char)0x78, (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78,
+        (char)0x7E, (char)0x88, (char)0x17, (char)0x87, (char)0xE8, (char)0x81, (char)0x78, (char)0x7E};
+
+    std::cout << "controller_node.WriteFile(\"Emmy\", 16, 0, emmy_file): " << std::endl;
+    controller_node.WriteFile("Emmy", 16, 0, emmy_file);
+    controller_node.ShowFiles();
+    controller_node.DisplayDisks(0,64);
+    
+    for (size_t i = 0; i < 5; i++)
+    {
+        printf("%02X", (unsigned char)(emmy_file[3*i] ^ emmy_file[3*i+1] ^ emmy_file[3*i+2]));
+        std::cout << std::endl;
+    }
+
+    //64//9B//57//16//49//B5//71//64//9B//57//16//49//B5//71//64//9B//57//16//49//B5//71//64//9B//57//16//49//B5//71
+    // Tilly
+    char tilly_file[28] = {(char)0x64, (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64,
+        (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64, (char)0x9B,
+        (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71, (char)0x64, (char)0x9B, (char)0x57, (char)0x16, (char)0x49, (char)0xB5, (char)0x71};
+
+    std::cout << "controller_node.WriteFile(\"Tilly\", 16, 0, tilly_file): " << std::endl;
+    controller_node.WriteFile("Tilly", 28, 32, tilly_file);
+    controller_node.ShowFiles();
+    controller_node.DisplayDisks(0,64);
+    
+    for (size_t i = 0; i < 7; i++)
+    {
+        printf("%02X", (unsigned char)(tilly_file[3*i] ^ tilly_file[3*i+1] ^ tilly_file[3*i+2]));
+        std::cout << std::endl;
+    }
+    */
 
 
 
+
+
+
+
+    // return 0;
 
 
 
@@ -92,7 +212,7 @@ int main() {
     cors
       .global()
         .headers("X-Custom-Header", "Content-Type")
-        .methods("POST"_method);
+        .methods("POST"_method, "GET"_method, "DELETE"_method);
     
     // Ruta para verificar que el servidor está funcionando
     CROW_ROUTE(app, "/")([](){
@@ -100,7 +220,7 @@ int main() {
     });
     
     // Ruta para subir archivos
-    CROW_ROUTE(app, "/upload").methods("POST"_method)([](const crow::request& req){
+    CROW_ROUTE(app, "/upload").methods("POST"_method)([&controller_node](const crow::request& req){
         // Directorio donde se guardarán los archivos
         const std::string upload_dir = "pdfs";
         
@@ -109,7 +229,7 @@ int main() {
             return crow::response(500, "No se pudo crear el directorio de subidas");
         }
 
-        std::cout << req.body << std::endl;
+        // std::cout << req.body << std::endl;
         
         // Parsear el cuerpo de la petición multipart
         crow::multipart::message file_message(req);
@@ -123,27 +243,33 @@ int main() {
         std::vector<std::string> saved_files;
     
 
-        for (const auto& part : file_message.parts) {
-            std::cout << "Parte: " << part.body << std::endl;
-        }
+        
         for (const auto& part : file_message.parts) {
             // Obtener el nombre original del archivo
+            
+            //std::cout << "Part name: " << part.headers << std::endl;
             std::string filename = get_filename_from_headers(part.headers);
             
             // Generar un nombre único para el archivo
             std::string unique_filename = generate_unique_filename(filename);
             std::string filepath = upload_dir + "/" + unique_filename;
             
-            // Guardar el archivo en el sistema
-            std::ofstream out_file(filepath, std::ios::binary);
-            if (!out_file) {
-                return crow::response(500, "Error al crear el archivo en el servidor");
+          
+
+            if (part.body.size() != 0){
+                int start = controller_node.FindStartPosition(filename , part.body.size());
+                if (start == -1) {
+                    return crow::response(500, "No hay suficiente espacio para guardar el archivo o el archivo ya existe");
+                }
+                else
+                {
+                    std::cout << "controller_node.WriteFile(\"" << filename << "\", " << part.body.size() << ", " << start << ")" << std::endl;
+                    controller_node.WriteFile(filename, part.body.size(), start, part.body.data());
+                    controller_node.ShowFiles();
+                }
+
             }
             
-            out_file.write(part.body.data(), part.body.size());
-            out_file.close();
-            
-            saved_files.push_back(unique_filename);
         }
         
         // Construir respuesta JSON
@@ -162,20 +288,17 @@ int main() {
         return "retornando los files";
     });
     CROW_ROUTE(app, "/get_file/<string>").methods("GET"_method)
-    ([](std::string filename){
+    ([&controller_node](std::string filename){
 
-        std::string filepath = "uploads/" + filename;
-        std::ifstream file(filepath, std::ios::binary);
-        
-            if (!file.is_open()) {
-            return crow::response(404, "Archivo no encontrado");
-        }
+       
 
         // Leer contenido
-        std::ostringstream buffer;
-        buffer << file.rdbuf();
-        std::string file_content = buffer.str();
+        std::string file_content = controller_node.GetFile(filename);
+        controller_node.ShowFiles();
 
+        if (file_content == "File not found.") {
+            return crow::response(404, "Archivo no encontrado");
+        }
         crow::response res;
         res.code = 200;
         res.set_header("Content-Type", "application/octet-stream");
@@ -184,8 +307,18 @@ int main() {
         return res;
     });
     CROW_ROUTE(app, "/delete_file/<string>").methods("DELETE"_method)
-    ([](std::string filename){
-        return "eliminando el file "+ filename;
+    ([&controller_node](std::string filename){
+        
+        // Lógica para eliminar el archivo
+        if (controller_node.DeleteFile(filename))
+        {
+            controller_node.ShowFiles();
+            return crow::response(200, "Archivo eliminado correctamente");
+        } else
+        {
+            controller_node.ShowFiles();
+            return crow::response(404, "Archivo no encontrado");
+        }
     });
 
     // Configurar y ejecutar el servidor
